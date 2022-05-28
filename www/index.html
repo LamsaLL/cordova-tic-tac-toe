@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <!-- Content-Security-Policy
+         Customize this policy to fit your own app's needs. For more guidance, see:
+         https://github.com/apache/cordova-plugin-whitelist/blob/master/README.md#content-security-policy
+    -->
+    <meta
+      content="default-src *; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'"
+      http-equiv="Content-Security-Policy"
+    />
+    <meta content="telephone=no" name="format-detection" />
+    <meta content="no" name="msapplication-tap-highlight" />
+    <meta
+      content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width"
+      name="viewport"
+    />
+
+    <title>Morpion</title>
+    <!-- On inclut le CSS de JQuery Mobile -->
+    <link
+      href="css/vendor/jquery.mobile-1.4.5.min.css"
+      rel="stylesheet"
+      type="text/css"
+    />
+    <!-- et le CSS spécifique à l'application -->
+    <link href="css/index.css" rel="stylesheet" type="text/css" />
+    <!-- Bibliothèques JS pour l'environnement (cordova, JQuery, Jquery Mobile) -->
+    <script src="cordova.js"></script>
+    <!-- cordova.js généré à la "compilation" -->
+    <script src="js/vendor/jquery-2.1.4.min.js"></script>
+    <script src="js/vendor/jquery.mobile-1.4.5.min.js"></script>
+    <!-- modules de l'application (index+controleur+modele) -->
+    <script src="js/ticTacToe.bundle.js"></script>
+    <!-- généré par webpack à la "compilation" -->
+  </head>
+  <body>
+    <!-- Fichier HTML = PARTIE "VUE" de l'application                                -->
+    <!--   composée d'une suite de 4 pages Jquery Mobile                             -->
+    <!-- Le comportement de chaque page est géré par un contrôleur (événements JS)   -->
+
+    <!--======== PAGE "vueChargement" - pour attendre que le périphérique soit prêt  ========-->
+    <!--           Contient un Header et un Footer qui seront dupliqués sur les autres pages  -->
+    <div data-role="page" data-theme="a" id="loadingView">
+      <header id="ticTacToeHeader">
+        <div data-id="myHeader" data-position="fixed" data-role="header">
+          <h1>Shifumii</h1>
+        </div>
+      </header>
+      <div class="ui-content" data-role="main">
+        <p>Chargement du jeu...</p>
+      </div>
+      <footer id="ticTacToeFooter">
+        <div data-id="myFooter" data-position="fixed" data-role="footer">
+          <h3>Un jeu MVC en Cordova+Jquery Mobile</h3>
+        </div>
+      </footer>
+    </div>
+
+    <!--======== PAGE "homeView" - saisie nom joueur    ========-->
+    <div data-role="page" data-theme="a" id="homeView">
+      <div class="ui-content" data-role="main">
+        <div>
+          <h2>Joueur 1</h2>
+          <Label>Pseudo</Label>
+          <input
+            id="playerName1"
+            placeholder="Entrez votre nom"
+            type="text"
+          />
+          <button id="btnPhoto1" data-icon="camera">Photo</button>
+          <img
+            id="playerImg1"
+            src=""
+            style="
+              width: 200px;
+              margin-left: auto;
+              margin-right: auto;
+              display: block;
+            "
+          />
+        </div>
+        <div>
+          <h2>Joueur 2</h2>
+          <Label>Pseudo</Label>
+          <input
+            id="playerName2"
+            placeholder="Entrez votre nom"
+            type="text"
+          />
+          <button id="btnPhoto2" data-icon="camera">Photo</button>
+          <img
+            id="playerImg2"
+            src=""
+            style="
+              width: 200px;
+              margin-left: auto;
+              margin-right: auto;
+              display: block;
+            "
+          />
+        </div>
+        <button id="btnNewGame" data-icon="carat-r">Jouer</button>
+      </div>
+    </div>
+
+    <!--======== PAGE "gameView" - déroulement d'une partie ========-->
+    <div data-role="page" data-theme="a" id="gameView">
+      <div class="ui-content ui-mini" data-role="main">
+        <h2 data-role="playerName">A playerX de jouer</h2>
+
+        <div class="ui-grid-b">
+          <div class="ui-block-a" >
+            <button class="mybtn" id="btn0" style="height: 200px;">
+              <img data-role="playerImg" src="" />
+            </button>
+          </div>
+          <div class="ui-block-b" >
+            <button class="mybtn" id="btn1" style="height: 200px;">
+              <img data-role="playerImg" src="" />
+            </button>
+          </div>
+          <div class="ui-block-c" >
+            <button class="mybtn" id="btn2" style="height: 200px;">
+              <img data-role="playerImg" src="" />
+            </button>
+          </div>
+          <div class="ui-block-a" >
+            <button class="mybtn" id="btn3" style="height: 200px;">
+              <img data-role="playerImg" src="" />
+            </button>
+          </div>
+          <div class="ui-block-b" >
+            <button class="mybtn" id="btn4" style="height: 200px;">
+              <img data-role="playerImg" src="" />
+            </button>
+          </div>
+          <div class="ui-block-c" >
+            <button class="mybtn" id="btn5" style="height: 200px;">
+              <img data-role="playerImg" src="" />
+            </button>
+          </div>
+          <div class="ui-block-a" >
+            <button class="mybtn" id="btn6" style="height: 200px;">
+              <img data-role="playerImg" src="" />
+            </button>
+          </div>
+          <div class="ui-block-b" >
+            <button class="mybtn" id="btn7" style="height: 200px;">
+              <img data-role="playerImg" src="" />
+            </button>
+          </div>
+          <div class="ui-block-c" >
+            <button class="mybtn" id="btn8" style="height: 200px;">
+              <img data-role="playerImg" src="" />
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!--======== PAGE "vueScore" - affichage des scores   ========-->
+    <div data-role="page" data-theme="a" id="endView">
+      <div class="ui-content" data-role="main">
+        <div style="text-align: center">
+          <h2>Fin de partie</h2>
+          <h3>Victoire de : playerX</h3>
+          <button id="btnReplay" data-icon="carat-l">Rejouer</button>
+
+          <h2>Scores</h2>
+      </div>
+    </div>
+  </body>
+</html>
