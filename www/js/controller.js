@@ -97,11 +97,13 @@ class HomeViewController {
 
   static loadPlayer() {
     const players = model.PlayersDao.getAllPlayers();
+
     console.log({ players });
     const name1 = $('#playerName1').val();
     const name2 = $('#playerName2').val();
-
+    console.log('lol');
     if (players.length == 2) {
+      console.log('2 joueurs');
       const player1 = model.PlayersUtils.findPlayerByNameInArray(
         players,
         $('#playerName1').val()
@@ -110,20 +112,28 @@ class HomeViewController {
         players,
         $('#playerName2').val()
       );
+      console.log({ players });
+
       session.currentPlayers = players;
+
       $('#playerImg1').attr('src', player1.picture);
       $('#playerImg2').attr('src', player2.picture);
     } else {
-      session.currentPlayers = [
+      const picture1 =
+        session.currentPlayers !== null ? session.currentPlayers.picture : '';
+      const picture2 =
+        session.currentPlayers !== null ? session.currentPlayers.picture : '';
+
+      const newPlayers = [
         new model.Player(1, name1, '', ''),
         new model.Player(2, name2, '', ''),
       ];
 
-      console.log({ session });
-      $('#playerImg1').attr('src', '');
-      $('#playerImg2').attr('src', '');
+      session.currentPlayers = [...newPlayers];
+
+      $('#playerImg1').attr('src', session.currentPlayers.picture || '');
+      $('#playerImg2').attr('src', session.currentPlayers.picture || '');
     }
-    console.log(`players : ${JSON.stringify(session.currentPlayers)}`);
   }
 
   static newGame() {
@@ -135,18 +145,15 @@ class HomeViewController {
       plugins.toast.showShortCenter('Saisir un nom de joueur');
     } else {
       // On utilise le modèle pour créer une nouvelle partie
+      console.log(`PLayer 2 :: ${session.currentPlayers[1]}`);
       session.currentGame = new model.TicTacToe(
         session.currentPlayers[0],
         session.currentPlayers[1]
       ); // charge la partie depuis le localstorage
-      // On "propage" le nom du joueur sur toutes les vues
       $('h2[data-role="playerName"]').each(function () {
-        $(this).html(`A ${session.currentPlayers.nom} de jouer`);
+        $(this).html(`A ${session.currentPlayers[0].name} de jouer`);
       });
-      // On "propage" la photo du joueur sur toutes les vues
-      // $('img[data-role="photoJoueur"]').each(function () {
-      //   $(this).attr('src', session.joueurEnCours.photo);
-      // });
+
       // Et on passe à une autre vue
       $.mobile.changePage('#gameView');
     }
@@ -213,6 +220,7 @@ class GameViewController {
   static play(playerMove) {
     // le joueur a choisi son coup
     // On interroge le modèle pour voir le résultat du nouveau coup
+    console.log(`Current game :: ${session.currentGame}`);
     session.currentGame.play(playerMove);
     // Le score a changé => on sauvegarde la partie en cours
     model.PlayersDao.savePlayers([
@@ -220,81 +228,96 @@ class GameViewController {
       session.currentGame.player2,
     ]);
     // get current player
-    const currentPlayer = model.TicTacToe.currentPlayer;
-
+    const currentPlayer = session.currentGame.currentPlayer;
+    console.log({ playerMove });
     // Et on met à jour la vue :
     // On disable le bouton joué par le joueur et on met son image
     switch (playerMove) {
       case 0:
         $('#btn0').prop('disabled', true);
         // set image of player who played
-        $('#bt0 > img[data-role="playerImg"]').attr(
+        $('#btn0 > img[data-role="playerImg"]').attr(
           'src',
           currentPlayer.picture
         );
+        console.log($('#bt0 > img[data-role="playerImg"]'));
+        break;
       case 1:
         $('#btn1').prop('disabled', true);
         // set image of player who played
-        $('#bt1 > img[data-role="playerImg"]').attr(
+        $('#btn1 > img[data-role="playerImg"]').attr(
           'src',
           currentPlayer.picture
         );
+        break;
       case 2:
         $('#btn2').prop('disabled', true);
         // set image of player who played
-        $('#bt2 > img[data-role="playerImg"]').attr(
+        $('#btn2 > img[data-role="playerImg"]').attr(
           'src',
           currentPlayer.picture
         );
+        break;
       case 3:
         $('#btn3').prop('disabled', true);
         // set image of player who played
-        $('#bt3 > img[data-role="playerImg"]').attr(
+        $('#btn3 > img[data-role="playerImg"]').attr(
           'src',
           currentPlayer.picture
         );
+        break;
       case 4:
         $('#btn4').prop('disabled', true);
         // set image of player who played
-        $('#bt4 > img[data-role="playerImg"]').attr(
+        $('#btn4 > img[data-role="playerImg"]').attr(
           'src',
           currentPlayer.picture
         );
+        break;
       case 5:
         $('#btn5').prop('disabled', true);
         // set image of player who played
-        $('#bt5 > img[data-role="playerImg"]').attr(
+        $('#btn5 > img[data-role="playerImg"]').attr(
           'src',
           currentPlayer.picture
         );
       case 6:
         $('#btn6').prop('disabled', true);
         // set image of player who played
-        $('#bt6 > img[data-role="playerImg"]').attr(
+        $('#btn6 > img[data-role="playerImg"]').attr(
           'src',
           currentPlayer.picture
         );
+        break;
       case 7:
         $('#btn7').prop('disabled', true);
         // set image of player who played
-        $('#bt7 > img[data-role="playerImg"]').attr(
+        $('#btn7 > img[data-role="playerImg"]').attr(
           'src',
           currentPlayer.picture
         );
+        break;
       case 8:
         $('#btn8').prop('disabled', true);
         // set image of player who played
-        $('#bt8 > img[data-role="playerImg"]').attr(
+        $('#btn8 > img[data-role="playerImg"]').attr(
           'src',
           currentPlayer.picture
         );
+        break;
       default:
         break;
     }
 
-    if (model.TicTacToe.isWin()) {
+    if (session.currentGame.isWin()) {
       this.endGame();
     }
+    // On change le joueur courant
+    session.currentGame.switchCurrentPlayer();
+
+    $('h2[data-role="playerName"]').each(function () {
+      $(this).html(`A ${session.currentGame.currentPlayer.name} de jouer`);
+    });
   }
 
   static endGame() {
@@ -335,9 +358,9 @@ class EndViewController {
 
   static init() {
     // initialisation de la page
-    $('#nbVictoires').html(session.currentGame.joueur.victoires);
-    $('#nbNuls').html(session.currentGame.joueur.nuls);
-    $('#nbDefaites').html(session.currentGame.joueur.defaites);
+    $('#nbVictoires').html(session.currentGame.player1.nbWin);
+    $('#nbNuls').html(session.currentGame.player1.nbDrawn);
+    $('#nbDefaites').html(session.currentGame.player1.nbLoss);
   }
 
   static replay() {
