@@ -12,13 +12,13 @@ export class Picture {
 
 // Classe pour représenter un joueur
 export class Player {
-  constructor(id, name, picture, nbWin = 0, nbLoss = 0, nbDrawn = 0) {
+  constructor(id, name, picture, nbWin = 0, nbLoss = 0, nbDraw = 0) {
     this.id = id;
     this.name = name;
     this.picture = picture;
     this.nbWin = nbWin;
     this.nbLoss = nbLoss;
-    this.nbDrawn = nbDrawn;
+    this.nbDraw = nbDraw;
   }
 }
 
@@ -58,7 +58,7 @@ export class TicTacToe {
   }
 
   // Renvoie vrai s'il y a match nul (aucune case)
-  isDrawn() {
+  isDraw() {
     return this.board.find((element) => element === 0) === undefined;
   }
 }
@@ -77,12 +77,6 @@ export class PlayersDao {
     if (stringPlayers === null) return new Array();
     else return JSON.parse(stringPlayers);
   }
-}
-
-export class ScoreDao {
-  static getScorePlayer(player) {}
-
-  static saveScorePlayer(player) {}
 }
 
 // Classe pour manipuler un tableau de joueurs

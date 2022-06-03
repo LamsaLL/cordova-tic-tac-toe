@@ -44,7 +44,7 @@
     <div data-role="page" data-theme="a" id="loadingView">
       <header id="ticTacToeHeader">
         <div data-id="myHeader" data-position="fixed" data-role="header">
-          <h1>Shifumii</h1>
+          <h1>Morpion</h1>
         </div>
       </header>
       <div class="ui-content" data-role="main">
@@ -164,10 +164,19 @@
       <div class="ui-content" data-role="main">
         <div style="text-align: center">
           <h2>Fin de partie</h2>
-          <h3>Victoire de : playerX</h3>
+          <h3 data-role="playerScore">Victoire de : playerX</h3>
           <button id="btnReplay" data-icon="carat-l">Rejouer</button>
 
-          <h2>Scores</h2>
+          <h2 >Scores</h2>
+          <table id="tableScores">
+            <thead>
+              <th></th>
+              <th>Victoires</th>
+              <th>Défaites</th>
+              <th>Nuls</th>
+            </thead>
+            <tbody></tbody>
+            </table>
       </div>
     </div>
   </body>

@@ -12,8 +12,9 @@ import * as model from './model.js'; // le contrôleur utilise le modèle
 ////////////////////////////////////////////////////////////////////////////////
 
 const session = {
-  currentPlayers: null, // Les joueurs courant
+  currentPlayers: [], // Les joueurs courant
   currentGame: null, // La partie en train d'être jouée
+  players: [], // Les joueurs
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -98,12 +99,10 @@ class HomeViewController {
   static loadPlayer() {
     const players = model.PlayersDao.getAllPlayers();
 
-    console.log({ players });
     const name1 = $('#playerName1').val();
     const name2 = $('#playerName2').val();
-    console.log('lol');
-    if (players.length == 2) {
-      console.log('2 joueurs');
+
+    if (players.length > 0) {
       const player1 = model.PlayersUtils.findPlayerByNameInArray(
         players,
         $('#playerName1').val()
@@ -112,27 +111,41 @@ class HomeViewController {
         players,
         $('#playerName2').val()
       );
-      console.log({ players });
 
-      session.currentPlayers = players;
-
-      $('#playerImg1').attr('src', player1.picture);
-      $('#playerImg2').attr('src', player2.picture);
+      if (player1) {
+        $('#playerImg1').attr('src', player1.picture);
+        session.currentPlayers[0] = player1;
+      } else {
+        $('#playerImg1').attr('src', '');
+        session.currentPlayers[0] = new model.Player(1, name1, '');
+      }
+      if (player2) {
+        $('#playerImg2').attr('src', player2.picture);
+        session.currentPlayers[1] = player2;
+      } else {
+        $('#playerImg2').attr('src', '');
+        session.currentPlayers[1] = new model.Player(2, name2, '');
+      }
+      // console log current player
     } else {
       const picture1 =
-        session.currentPlayers !== null ? session.currentPlayers.picture : '';
+        session.currentPlayers[0] !== null
+          ? session.currentPlayers[0].picture
+          : '';
       const picture2 =
-        session.currentPlayers !== null ? session.currentPlayers.picture : '';
+        session.currentPlayers[1] !== null
+          ? session.currentPlayers[1].picture
+          : '';
 
       const newPlayers = [
-        new model.Player(1, name1, '', ''),
-        new model.Player(2, name2, '', ''),
+        new model.Player(1, name1, picture1),
+        new model.Player(2, name2, picture2),
       ];
 
       session.currentPlayers = [...newPlayers];
 
-      $('#playerImg1').attr('src', session.currentPlayers.picture || '');
-      $('#playerImg2').attr('src', session.currentPlayers.picture || '');
+      $('#playerImg1').attr('src', picture1);
+      $('#playerImg2').attr('src', picture2);
     }
   }
 
@@ -145,7 +158,6 @@ class HomeViewController {
       plugins.toast.showShortCenter('Saisir un nom de joueur');
     } else {
       // On utilise le modèle pour créer une nouvelle partie
-      console.log(`PLayer 2 :: ${session.currentPlayers[1]}`);
       session.currentGame = new model.TicTacToe(
         session.currentPlayers[0],
         session.currentPlayers[1]
@@ -175,8 +187,8 @@ class HomeViewController {
         }
       })
       .catch((err) => {
-        session.currentPlayers[0].photo = '';
-        session.currentPlayers[1].photo = '';
+        session.currentPlayers[0].picture = '';
+        session.currentPlayers[1].picture = '';
         $('#playerImg1').attr('src', '');
         $('#playerImg2').attr('src', '');
         console.log({ err });
@@ -209,27 +221,18 @@ class GameViewController {
 
   static init() {
     // initialisation de la page
-    // on active et on montre tous les boutons du joueur
-    $('button[id^=btnJouer]').prop('disabled', false).show();
-    // on cache toutes les réponses de la machine
-    $('img[id^=machine]').hide();
-    // on cache la div resultat
-    $('#resultat').hide();
+    // on able les boutons du jeu
+    for (let i = 0; i < 9; i++) {
+      $(`#btn${i}`).prop('disabled', false);
+      $(`#btn${i} > img[data-role="playerImg"]`).attr('src', '');
+    }
   }
 
   static play(playerMove) {
     // le joueur a choisi son coup
-    // On interroge le modèle pour voir le résultat du nouveau coup
-    console.log(`Current game :: ${session.currentGame}`);
     session.currentGame.play(playerMove);
-    // Le score a changé => on sauvegarde la partie en cours
-    model.PlayersDao.savePlayers([
-      session.currentGame.player1,
-      session.currentGame.player2,
-    ]);
     // get current player
     const currentPlayer = session.currentGame.currentPlayer;
-    console.log({ playerMove });
     // Et on met à jour la vue :
     // On disable le bouton joué par le joueur et on met son image
     switch (playerMove) {
@@ -310,6 +313,36 @@ class GameViewController {
     }
 
     if (session.currentGame.isWin()) {
+      const winner = {
+        ...session.currentGame.currentPlayer,
+        nbWin: session.currentGame.currentPlayer.nbWin + 1,
+      };
+      const notCurrentPlayer =
+        session.currentGame.player1 === currentPlayer
+          ? session.currentGame.player2
+          : session.currentGame.player1;
+      const loser = {
+        ...notCurrentPlayer,
+        nbLose: notCurrentPlayer.nbLose + 1,
+      };
+      console.log(session.currentPlayers);
+      model.PlayersUtils.addOrUpdatePlayerInArray(session.players, winner);
+      model.PlayersUtils.addOrUpdatePlayerInArray(session.players, loser);
+      model.PlayersDao.savePlayers(session.players);
+
+      this.endGame();
+    } else if (session.currentGame.isDraw()) {
+      const player1 = {
+        ...session.currentGame.player1,
+        nbDraw: session.currentGame.player1.nbDraw + 1,
+      };
+      const player2 = {
+        ...session.currentGame.player2,
+        nbDraw: session.currentGame.player1.nbDraw + 1,
+      };
+      model.PlayersUtils.addOrUpdatePlayerInArray(session.players, player1);
+      model.PlayersUtils.addOrUpdatePlayerInArray(session.players, player2);
+      model.PlayersDao.savePlayers(session.players);
       this.endGame();
     }
     // On change le joueur courant
@@ -317,6 +350,9 @@ class GameViewController {
 
     $('h2[data-role="playerName"]').each(function () {
       $(this).html(`A ${session.currentGame.currentPlayer.name} de jouer`);
+    });
+    $('h2[data-role="playerName"]').each(function () {
+      $(this).html(`A ${session.currentPlayers[0].name} de jouer`);
     });
   }
 
@@ -342,12 +378,6 @@ class EndViewController {
         this.replay();
       }.bind(this)
     );
-    // $('#btnSupprimer').on(
-    //   'click',
-    //   function () {
-    //     this.supprimerJoueur();
-    //   }.bind(this)
-    // );
     $('#btnBackHome').on(
       'click',
       function () {
@@ -358,19 +388,33 @@ class EndViewController {
 
   static init() {
     // initialisation de la page
-    $('#nbVictoires').html(session.currentGame.player1.nbWin);
-    $('#nbNuls').html(session.currentGame.player1.nbDrawn);
-    $('#nbDefaites').html(session.currentGame.player1.nbLoss);
+    // on montre le nom du joueur gagnant
+    if (session.currentGame.isWin()) {
+      $('h3[data-role="playerScore"]').html(
+        `${session.currentGame.currentPlayer.name} a gagné !`
+      );
+    } else if (session.currentGame.isDraw()) {
+      $('h3[data-role="playerScore"]').html(`Match nul !`);
+    }
+    // on montre le tableau des scores de tous les joueurs
+    // get all players
+    const players = model.PlayersDao.getAllPlayers();
+    console.log({ players });
+    // generate html table
+    const table = $('#tableScores');
+    // clear data of table exept header
+    table.find('tbody').html('');
+
+    players.forEach((player) => {
+      table.append(
+        `<tr><td>${player.name}</td><td>${player.nbWin}</td><td>${player.nbLoss}</td><td>${player.nbDraw}</td></tr>`
+      );
+    });
   }
 
   static replay() {
-    $.mobile.changePage('#gameView');
+    $.mobile.changePage('#homeView');
   }
-
-  // static supprimerJoueur() {
-  //   model.JoueurDAO.removeJoueur(session.partieEnCours.joueur.nom);
-  //   this.retourAccueil();
-  // }
 
   static backHome() {
     $.mobile.changePage('#homeView');
