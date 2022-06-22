@@ -17,7 +17,6 @@ var app = {
   // 'pause', 'resume', etc.
   onDeviceReady: function () {
     controller.init();
-    console.log('lol');
   },
 };
 
