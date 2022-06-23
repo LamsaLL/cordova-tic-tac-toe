@@ -156,7 +156,7 @@ class HomeViewController {
       session.currentGame = new model.TicTacToe(
         { id: 1, ...session.currentPlayers[0] },
         { id: 2, ...session.currentPlayers[1] }
-      ); // charge la partie depuis le localstorage
+      );
 
       // Et on passe à une autre vue
       $.mobile.changePage('#gameView');
@@ -216,9 +216,6 @@ class GameViewController {
       $(`#btn${i} > img[data-role="playerImg"]`).attr('src', '');
     }
     // On affiche le nom du joueur qui commence
-    // $('h2[data-role="playerName"]').each(function () {
-    //   $(this).html(`A ${session.currentGame.currentPlayer.name} de jouer`);
-    // });
     $('h2[data-role="playerName"]').text(
       `A ${session.currentGame.currentPlayer.name} de jouer`
     );
@@ -337,7 +334,7 @@ class GameViewController {
 
     // On met a jour l'affichage du nom du joueur
     $('h2[data-role="playerName"]').text(
-      `A ${session.currentGame.currentPlayer.name} de jouerrrr`
+      `A ${session.currentGame.currentPlayer.name} de jouer`
     );
   }
 
